@@ -5,6 +5,8 @@ A modern lead generation and intelligence platform built to help sales teams dis
 This project was developed as part of the Caprae Capital AI-readiness pre-screening challenge, with a focus on practical lead-generation workflows and AI-powered sales assistance.
 
 ---
+##  Live link 
+https://lead-intelligence-tool-w4tz.vercel.app/
 
 ##  Project Overview
 
@@ -59,7 +61,4 @@ Leads are automatically categorized:
 ```text
 80–100 → HOT
 60–79  → WARM
-0–59   → COLD ```
-
-##  Live link 
-https://lead-intelligence-tool-w4tz.vercel.app/
+0–59   → COLD 
