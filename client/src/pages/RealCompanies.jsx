@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import {
   Search,
   Building2,
@@ -7,17 +8,27 @@ import {
   Plus,
   Check,
 } from "lucide-react";
-import { createLead } from "../services/api";
+
+import {
+  createLead,
+  searchCompanies,
+} from "../services/api";
 
 const RealCompanies = () => {
   const [query, setQuery] = useState("");
+
   const [companies, setCompanies] = useState([]);
+
   const [loading, setLoading] = useState(false);
+
   const [addingId, setAddingId] = useState(null);
+
   const [addedIds, setAddedIds] = useState([]);
+
   const [error, setError] = useState("");
 
-  const searchCompanies = async (e) => {
+  // SEARCH REAL COMPANIES
+  const handleSearchCompanies = async (e) => {
     e.preventDefault();
 
     if (!query.trim()) {
@@ -27,69 +38,77 @@ const RealCompanies = () => {
 
     try {
       setLoading(true);
+
       setError("");
+
       setCompanies([]);
 
-      const response = await fetch(
-        `http://localhost:5000/api/gleif/search?query=${encodeURIComponent(
-          query.trim()
-        )}`
+      const data = await searchCompanies(
+        query.trim()
       );
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || "Failed to search companies");
-      }
-
-      setCompanies(result.data || []);
+      setCompanies(data || []);
     } catch (error) {
-      console.error(error);
-      setError(error.message || "Something went wrong");
+      console.error("SEARCH COMPANY ERROR:", error);
+
+      setError(
+        error.message || "Something went wrong"
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  // ADD COMPANY TO LEADS
   const handleAddToLeads = async (company) => {
-  try {
-    setAddingId(company.lei);
-    setError("");
+    try {
+      setAddingId(company.lei);
 
-    const leadData = {
-      company: company.company,
+      setError("");
 
-      contact: "Not assigned",
-      role: "Not assigned",
+      const leadData = {
+        company: company.company,
 
-      industry: "Other",
+        contact: "Not assigned",
 
-      location: company.city
-        ? `${company.city}, ${company.country}`
-        : company.country || "Unknown",
+        role: "Not assigned",
 
-      employees: 0,
-      revenue: "Not available",
+        industry: "Other",
 
-      website: "",
-      email: "",
-      phone: "",
-      linkedin: "",
-    };
+        location: company.city
+          ? `${company.city}, ${company.country}`
+          : company.country || "Unknown",
 
-    await createLead(leadData);
+        employees: 0,
 
-    setAddedIds((prev) => [...prev, company.lei]);
-  } catch (error) {
-    console.error(error);
+        revenue: "Not available",
 
-    setError(
-      error.message || "Failed to add company as lead"
-    );
-  } finally {
-    setAddingId(null);
-  }
-};
+        website: "",
+
+        email: "",
+
+        phone: "",
+
+        linkedin: "",
+      };
+
+      await createLead(leadData);
+
+      setAddedIds((prev) => [
+        ...prev,
+        company.lei,
+      ]);
+    } catch (error) {
+      console.error("ADD COMPANY ERROR:", error);
+
+      setError(
+        error.message ||
+          "Failed to add company as lead"
+      );
+    } finally {
+      setAddingId(null);
+    }
+  };
 
   return (
     <div>
@@ -104,9 +123,9 @@ const RealCompanies = () => {
         </p>
       </div>
 
-      {/* Search */}
+      {/* Search Form */}
       <form
-        onSubmit={searchCompanies}
+        onSubmit={handleSearchCompanies}
         className="bg-white border border-slate-200 rounded-xl p-5 mb-6"
       >
         <div className="flex gap-3">
@@ -120,7 +139,9 @@ const RealCompanies = () => {
               type="text"
               placeholder="Search company e.g. Apple, Microsoft..."
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) =>
+                setQuery(e.target.value)
+              }
               className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -130,7 +151,9 @@ const RealCompanies = () => {
             disabled={loading}
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
           >
-            {loading ? "Searching..." : "Search"}
+            {loading
+              ? "Searching..."
+              : "Search"}
           </button>
         </div>
       </form>
@@ -142,7 +165,7 @@ const RealCompanies = () => {
         </div>
       )}
 
-      {/* Results */}
+      {/* Search Results */}
       {companies.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
@@ -156,8 +179,11 @@ const RealCompanies = () => {
           </div>
 
           {companies.map((company) => {
-            const isAdded = addedIds.includes(company.lei);
-            const isAdding = addingId === company.lei;
+            const isAdded =
+              addedIds.includes(company.lei);
+
+            const isAdding =
+              addingId === company.lei;
 
             return (
               <div
@@ -176,15 +202,19 @@ const RealCompanies = () => {
 
                     <div>
                       <h3 className="text-lg font-semibold text-slate-800">
-                        {company.company || "Unknown Company"}
+                        {company.company ||
+                          "Unknown Company"}
                       </h3>
 
                       <div className="flex items-center gap-2 text-sm text-slate-500 mt-1">
                         <MapPin size={15} />
 
                         <span>
-                          {company.city || "Unknown City"},{" "}
-                          {company.country || "Unknown Country"}
+                          {company.city ||
+                            "Unknown City"}
+                          ,{" "}
+                          {company.country ||
+                            "Unknown Country"}
                         </span>
                       </div>
                     </div>
@@ -192,6 +222,7 @@ const RealCompanies = () => {
 
                   <div className="flex items-center gap-1 text-sm text-green-600">
                     <ShieldCheck size={17} />
+
                     Verified LEI
                   </div>
                 </div>
@@ -224,7 +255,8 @@ const RealCompanies = () => {
                     </p>
 
                     <p className="text-sm font-medium text-slate-700 mt-1">
-                      {company.registrationStatus || "N/A"}
+                      {company.registrationStatus ||
+                        "N/A"}
                     </p>
                   </div>
                 </div>
@@ -242,10 +274,12 @@ const RealCompanies = () => {
                   </div>
                 )}
 
-                {/* Add Button */}
+                {/* Add To Leads Button */}
                 <div className="mt-5 flex justify-end">
                   <button
-                    onClick={() => handleAddToLeads(company)}
+                    onClick={() =>
+                      handleAddToLeads(company)
+                    }
                     disabled={isAdding || isAdded}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition ${
                       isAdded
@@ -261,7 +295,10 @@ const RealCompanies = () => {
                     ) : (
                       <>
                         <Plus size={17} />
-                        {isAdding ? "Adding..." : "Add to Leads"}
+
+                        {isAdding
+                          ? "Adding..."
+                          : "Add to Leads"}
                       </>
                     )}
                   </button>
@@ -273,22 +310,25 @@ const RealCompanies = () => {
       )}
 
       {/* Empty State */}
-      {!loading && !error && companies.length === 0 && (
-        <div className="bg-white border border-dashed border-slate-300 rounded-xl p-12 text-center">
-          <Building2
-            size={40}
-            className="mx-auto text-slate-300 mb-3"
-          />
+      {!loading &&
+        !error &&
+        companies.length === 0 && (
+          <div className="bg-white border border-dashed border-slate-300 rounded-xl p-12 text-center">
+            <Building2
+              size={40}
+              className="mx-auto text-slate-300 mb-3"
+            />
 
-          <h3 className="text-lg font-semibold text-slate-700">
-            Search for a real company
-          </h3>
+            <h3 className="text-lg font-semibold text-slate-700">
+              Search for a real company
+            </h3>
 
-          <p className="text-sm text-slate-500 mt-1">
-            Enter a company name above to discover public company data.
-          </p>
-        </div>
-      )}
+            <p className="text-sm text-slate-500 mt-1">
+              Enter a company name above to discover
+              public company data.
+            </p>
+          </div>
+        )}
     </div>
   );
 };
