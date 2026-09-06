@@ -1,7 +1,7 @@
 const API_URL =
   import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-// Get all leads
+// GET ALL LEADS
 export const getLeads = async () => {
   const response = await fetch(`${API_URL}/leads`);
 
@@ -10,10 +10,11 @@ export const getLeads = async () => {
   }
 
   const result = await response.json();
+
   return result.data;
 };
 
-// Get single lead
+// GET SINGLE LEAD
 export const getLeadById = async (id) => {
   const response = await fetch(`${API_URL}/leads/${id}`);
 
@@ -22,17 +23,20 @@ export const getLeadById = async (id) => {
   }
 
   const result = await response.json();
+
   return result.data;
 };
 
-// Create lead
+// CREATE LEAD
 export const createLead = async (lead) => {
   try {
     const response = await fetch(`${API_URL}/leads`, {
       method: "POST",
+
       headers: {
         "Content-Type": "application/json",
       },
+
       body: JSON.stringify(lead),
     });
 
@@ -49,11 +53,12 @@ export const createLead = async (lead) => {
     return result.data;
   } catch (error) {
     console.error("CREATE LEAD API ERROR:", error);
+
     throw error;
   }
 };
 
-// Delete lead
+// DELETE LEAD
 export const deleteLead = async (id) => {
   const response = await fetch(`${API_URL}/leads/${id}`, {
     method: "DELETE",
@@ -66,7 +71,7 @@ export const deleteLead = async (id) => {
   return response.json();
 };
 
-// Generate AI outreach email
+// GENERATE AI OUTREACH EMAIL
 export const generateAIEmail = async (lead) => {
   const payload = {
     company: lead.company,
@@ -82,9 +87,11 @@ export const generateAIEmail = async (lead) => {
 
   const response = await fetch(`${API_URL}/ai/generate-email`, {
     method: "POST",
+
     headers: {
       "Content-Type": "application/json",
     },
+
     body: JSON.stringify(payload),
   });
 
@@ -93,6 +100,23 @@ export const generateAIEmail = async (lead) => {
   if (!response.ok) {
     throw new Error(
       result.message || "Failed to generate AI email"
+    );
+  }
+
+  return result.data;
+};
+
+// SEARCH REAL COMPANIES
+export const searchCompanies = async (query) => {
+  const response = await fetch(
+    `${API_URL}/gleif/search?query=${encodeURIComponent(query)}`
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.message || "Failed to search companies"
     );
   }
 
